@@ -15,6 +15,7 @@ import ResultCard from "./result-card";
 import { Loader2, Download } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import jsPDF from "jspdf";
+import logo from "@/public/logo.png";
 import 'jspdf-autotable';
 import {
   calculateCcfClinico,
@@ -160,6 +161,21 @@ export function CcfForm() {
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const formData = form.getValues();
+      // 🖼️ Inserir Logo
+      const img = new Image();
+      img.src = logo.src;
+
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const logoWidth = 40;
+      const logoHeight = (img.height / img.width) * logoWidth;
+
+      pdf.addImage(img, 'PNG', 15, 10, logoWidth, logoHeight);
+
+      // Agora o conteúdo começa depois do logo
+      let yPos = 10 + logoHeight + 10;
       const { individualScores, ccfClinico, ccfFuncional, totalScore, trilha, classification } = result;
 
       // --- Estilos e Configurações ---
