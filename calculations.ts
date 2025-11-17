@@ -106,8 +106,8 @@ function getVinculoScore(value: CcfFormData["vinculo"]): number {
 }
 
 function getImsScore(imsValue: number): number {
-    // Retorna o valor interno (0-10) diretamente como a pontuação.
-    return imsValue;
+    const item = imsData.find(d => d.imsValue === imsValue);
+    return item ? item.ccfScore : 0;
 }
 
 function getVmScore(vm: CcfFormData["vm"]): number {
@@ -257,7 +257,7 @@ export function getTrilhaDeFuncionalidade(score: number): TrilhaDeFuncionalidade
 export type { CcfFormData };
 export const imsOptions = imsData.map(item => ({
     value: item.imsValue,
-    label: `${item.ccfScore}\t${item.label}`
+    label: `${item.imsValue}\t${item.label}`
 }));
 
 export const getImsDescription = (imsValue: number): string => {
@@ -266,5 +266,6 @@ export const getImsDescription = (imsValue: number): string => {
 };
 
 export const getImsTooltip = (): string => {
-    return imsData.map(item => `${item.ccfScore} pts (${item.label}) = IMS ${item.imsValue}`).join(' | ');
+    return imsData.map(item => `IMS ${item.imsValue} (CCF ${item.ccfScore} pts): ${item.label}`).join(' | ');
 }
+
