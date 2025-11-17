@@ -178,8 +178,7 @@ export function CcfForm() {
       let yPos = 10 + logoHeight + 10;
       const { individualScores, ccfClinico, ccfFuncional, totalScore, trilha, classification } = result;
 
-      // --- Estilos e Configurações ---
-      let yPos = 15;
+      // --- Estilos e Configurações --
       const margin = 15;
       const pageHeight = pdf.internal.pageSize.getHeight();
       const titleFontSize = 14;
