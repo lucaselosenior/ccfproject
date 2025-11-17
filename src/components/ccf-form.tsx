@@ -15,7 +15,6 @@ import ResultCard from "./result-card";
 import { Loader2, Download } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import jsPDF from "jspdf";
-import logo from "@/public/logo.png";
 import 'jspdf-autotable';
 import {
   calculateCcfClinico,
@@ -29,6 +28,8 @@ import {
 } from "@/lib/calculations";
 
 const LOCAL_STORAGE_KEY = "ccf-form-data";
+const img = "/logo.png";
+
 
 type ResultState = {
     totalScore: number;
@@ -172,7 +173,7 @@ export function CcfForm() {
       const logoWidth = 40;
       const logoHeight = (img.height / img.width) * logoWidth;
 
-      pdf.addImage(img, 'PNG', 15, 10, logoWidth, logoHeight);
+      pdf.addImage(img, "PNG", 15, 10, 40, 40);
 
       // Agora o conteúdo começa depois do logo
       let yPos = 10 + logoHeight + 10;
