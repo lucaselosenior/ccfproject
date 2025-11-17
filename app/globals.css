@@ -46,6 +46,16 @@ body {
     --moderate: 45 90% 50%; /* Yellow */
     --high: 25 90% 50%; /* Orange */
     --extreme: 0 80% 55%; /* Red */
+
+    /* Trilha Colors */
+    --trilha-dark-green: 120 100% 90%; /* #e6ffe6 */
+    --trilha-light-green: 120 100% 95%; /* #f2fff2 */
+    --trilha-yellow: 60 100% 90%; /* #ffffcc */
+    --trilha-light-yellow: 60 100% 95%; /* #fffff2 */
+    --trilha-orange: 39 100% 90%; /* #ffebcc */
+    --trilha-light-orange: 39 100% 95%; /* #fff5e6 */
+    --trilha-light-red: 0 100% 95%; /* #fff2f2 */
+    --trilha-red: 0 100% 90%; /* #ffcccc */
   }
   .dark {
     --background: 225 10% 10%;
@@ -85,6 +95,16 @@ body {
     --moderate: 45 90% 60%; /* Yellow */
     --high: 25 90% 60%; /* Orange */
     --extreme: 0 80% 65%; /* Red */
+
+    /* Trilha Colors Dark */
+    --trilha-dark-green: 120 30% 20%;
+    --trilha-light-green: 120 30% 15%;
+    --trilha-yellow: 60 30% 20%;
+    --trilha-light-yellow: 60 30% 15%;
+    --trilha-orange: 39 30% 20%;
+    --trilha-light-orange: 39 30% 15%;
+    --trilha-light-red: 0 30% 15%;
+    --trilha-red: 0 30% 20%;
   }
 }
 

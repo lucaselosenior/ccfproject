@@ -14,21 +14,22 @@ export type TrilhaDeFuncionalidade = {
     nome: string;
     tempo: string;
     diretriz: string;
+    color: string; // Cor em HSL para o card
 };
 
 // --- Estrutura de Dados do IMS ---
 export const imsData = [
-    { label: "passivo", imsValue: 0, ccfScore: 4 },
-    { label: "restrito ao leito", imsValue: 1, ccfScore: 4 },
-    { label: "passivo para CR - não realiza OT", imsValue: 2, ccfScore: 4 },
-    { label: "senta, mas precisa de auxílio", imsValue: 3, ccfScore: 3 },
-    { label: "assume OT com auxílio", imsValue: 4, ccfScore: 3 },
-    { label: "participa de transferência para cadeira", imsValue: 5, ccfScore: 3 },
-    { label: "marcha 4 passos no lugar, com ou sem auxílio", imsValue: 6, ccfScore: 2 },
-    { label: "deambula 5m com auxílio de 2 pessoas", imsValue: 7, ccfScore: 2 },
-    { label: "deambula 5m com auxílio de 1 pessoa", imsValue: 8, ccfScore: 2 },
-    { label: "deambula 5m com DAM", imsValue: 9, ccfScore: 1 },
-    { label: "deambula 5m independente", imsValue: 10, ccfScore: 1 },
+    { imsValue: 0, ccfScore: 4, label: "passivo" },
+    { imsValue: 1, ccfScore: 4, label: "restrito ao leito" },
+    { imsValue: 2, ccfScore: 4, label: "passivo para CR - não realiza OT" },
+    { imsValue: 3, ccfScore: 3, label: "senta, mas precisa de auxílio" },
+    { imsValue: 4, ccfScore: 3, label: "assume OT com auxílio" },
+    { imsValue: 5, ccfScore: 3, label: "participa de transferência para cadeira" },
+    { imsValue: 6, ccfScore: 2, label: "marcha 4 passos no lugar, com ou sem auxílio" },
+    { imsValue: 7, ccfScore: 2, label: "deambula 5m com auxílio de 2 pessoas" },
+    { imsValue: 8, ccfScore: 2, label: "deambula 5m com auxílio de 1 pessoa" },
+    { imsValue: 9, ccfScore: 1, label: "deambula 5m com DAM" },
+    { imsValue: 10, ccfScore: 1, label: "deambula 5m independente" },
 ];
 
 // --- Funções de Cálculo de Pontuação ---
@@ -230,15 +231,16 @@ export function classifyCcfScoreAndSuggestPlan(input: { ccfScore: number }): Cla
 
 
 const trilhaData: TrilhaDeFuncionalidade[] = [
-    { nivel: "Baixo", subnivel: "1A", pontuacao: "6 a 9", nome: "80+ Integridade Funcional – Não domiciliar / Gerenciamento", tempo: "Prevenção", diretriz: ""},
-    { nivel: "Baixo", subnivel: "1B", pontuacao: "10 a 13", nome: "80+ Vitalidade", tempo: "Até 3 meses", diretriz: "Intervenção Funcional Breve" },
-    { nivel: "Moderado", subnivel: "2A", pontuacao: "14 a 17", nome: "80+ Transição Funcional", tempo: "Até 6 meses", diretriz: "Reabilitação Funcional moderada" },
-    { nivel: "Moderado", subnivel: "2B", pontuacao: "18 a 22", nome: "80+ Reabilitação Ativa", tempo: "Até 6 meses", diretriz: "Manutenção funcional" },
-    { nivel: "Alto", subnivel: "3A", pontuacao: "23 a 27", nome: "80+ Reabilitação Assistida", tempo: "Revisão 6 meses", diretriz: "Minimizar declínio funcional" },
-    { nivel: "Alto", subnivel: "3B", pontuacao: "28 a 31", nome: "80+ Estabilização Funcional Avançada", tempo: "Revisão 6 meses", diretriz: "Gerenciamento funcional e Controle clínico" },
-    { nivel: "Extremo", subnivel: "4A", pontuacao: "32 a 36", nome: "80+ Intervenção Funcional Contínua de alta complexidade com revisão periódica", tempo: "Ajuste de frequência", diretriz: "Intervenção intensiva" },
-    { nivel: "Extremo", subnivel: "4B", pontuacao: "37 a 39", nome: "80+ Complexidade Avançada", tempo: "Superior a 3 semanas", diretriz: "Suporte contínuo" },
+    { nivel: "Baixo", subnivel: "1A", pontuacao: "6 a 9", nome: "80+ Integridade Funcional", tempo: "Não domiciliar / Gerenciamento", diretriz: "Prevenção", color: "hsl(var(--trilha-dark-green))" },
+    { nivel: "Baixo", subnivel: "1B", pontuacao: "10 a 13", nome: "80+ Vitalidade", tempo: "Até 3 meses", diretriz: "Intervenção Funcional Breve", color: "hsl(var(--trilha-light-green))" },
+    { nivel: "Moderado", subnivel: "2A", pontuacao: "14 a 17", nome: "80+ Transição Funcional", tempo: "Até 6 meses", diretriz: "Reabilitação Funcional moderada", color: "hsl(var(--trilha-yellow))" },
+    { nivel: "Moderado", subnivel: "2B", pontuacao: "18 a 22", nome: "80+ Reabilitação Ativa", tempo: "Até 6 meses", diretriz: "Manutenção funcional", color: "hsl(var(--trilha-light-yellow))" },
+    { nivel: "Alto", subnivel: "3A", pontuacao: "23 a 27", nome: "80+ Reabilitação Assistida", tempo: "Revisão 6 meses", diretriz: "Minimizar declínio funcional", color: "hsl(var(--trilha-orange))" },
+    { nivel: "Alto", subnivel: "3B", pontuacao: "28 a 31", nome: "80+ Estabilização Funcional Avançada", tempo: "Revisão 6 meses", diretriz: "Gerenciamento funcional e Controle clínico", color: "hsl(var(--trilha-light-orange))" },
+    { nivel: "Extremo", subnivel: "4A", pontuacao: "32 a 36", nome: "80+ Intervenção Funcional Contínua de alta complexidade com revisão periódica", tempo: "Ajuste de frequência", diretriz: "Intervenção intensiva", color: "hsl(var(--trilha-light-red))" },
+    { nivel: "Extremo", subnivel: "4B", pontuacao: "37 a 39", nome: "80+ Complexidade Avançada", tempo: "Superior a 3 semanas", diretriz: "Suporte contínuo", color: "hsl(var(--trilha-red))" },
 ];
+
 
 export function getTrilhaDeFuncionalidade(score: number): TrilhaDeFuncionalidade | null {
     if (score < 6) return null;
@@ -266,6 +268,5 @@ export const getImsDescription = (imsValue: number): string => {
 };
 
 export const getImsTooltip = (): string => {
-    return imsData.map(item => `IMS ${item.imsValue} (CCF ${item.ccfScore} pts): ${item.label}`).join(' | ');
+    return imsData.map(item => `IMS ${item.imsValue} (${item.label}) pontua ${item.ccfScore} no CCF`).join(' | ');
 }
-

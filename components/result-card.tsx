@@ -206,15 +206,6 @@ export default function ResultCard({
                 <span className="text-base text-muted-foreground">Pontuação Total CCF</span>
                 <span className="text-2xl font-bold">{totalScore}</span>
             </div>
-            <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Classificação</span>
-                <div className="flex items-center">
-                  {config.icon}
-                  <span className="font-semibold" style={{ color: config.color }}>
-                    {config.label}
-                  </span>
-                </div>
-            </div>
           </div>
   
           <div className="space-y-2">
@@ -225,8 +216,8 @@ export default function ResultCard({
           </div>
 
           {trilha && (
-            <div className="space-y-3 rounded-lg border bg-card p-4 shadow-sm">
-                <h4 className="font-medium">Trilha de Funcionalidade</h4>
+            <div className="space-y-3 rounded-lg border p-4 shadow-sm" style={{ backgroundColor: trilha.color }}>
+                <h4 className="font-medium text-card-foreground">Trilha de Funcionalidade</h4>
                 <div className="space-y-2 pl-2">
                     <TrilhaRow label="Nível" value={trilha.nivel} />
                     <TrilhaRow label="Subnível" value={trilha.subnivel} />
