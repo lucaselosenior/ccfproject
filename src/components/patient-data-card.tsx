@@ -85,7 +85,7 @@ export default function PatientDataCard() {
                 control={form.control}
                 name="nome"
                 render={({ field }) => (
-                    <FormItem className="md:col-span-2">
+                    <FormItem>
                         <div className="flex items-center gap-2">
                             <FormLabel>Nome do Paciente</FormLabel>
                             <Tooltip>
@@ -99,6 +99,29 @@ export default function PatientDataCard() {
                         </div>
                     <FormControl>
                         <Input type="text" placeholder="Ex: João da Silva" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            <FormField
+                control={form.control}
+                name="dataDoCaso"
+                render={({ field }) => (
+                    <FormItem>
+                        <div className="flex items-center gap-2">
+                            <FormLabel>Data do Caso</FormLabel>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 cursor-help text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                <p>Data do caso (opcional).</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    <FormControl>
+                        <Input type="text" placeholder="Ex: 15/01/2024" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>

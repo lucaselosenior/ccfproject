@@ -8,7 +8,6 @@ import { ccfFormSchema, type CcfFormData } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { getCcfClassification } from "@/app/actions";
 import PatientDataCard from "./patient-data-card";
 import EvaluationItemsCard from "./evaluation-items-card";
 import ResultCard from "./result-card";
@@ -21,6 +20,7 @@ import {
   calculateCcfFuncional,
   getIndividualScores,
   getTrilhaDeFuncionalidade,
+  classifyCcfScoreAndSuggestPlan,
   type IndividualScores,
   type ClassifyCCFOutput,
   type TrilhaDeFuncionalidade,
@@ -49,6 +49,7 @@ export function CcfForm() {
     resolver: zodResolver(ccfFormSchema),
     defaultValues: {
         nome: "",
+        dataDoCaso: "",
         idade: '' as any,
         hd: "CID Crônico estável",
         internacao: "Não",
@@ -95,47 +96,38 @@ export function CcfForm() {
   }, [form]);
 
   const onSubmit: SubmitHandler<CcfFormData> = (data) => {
-    startTransition(async () => {
+    startTransition(() => {
       const ccfClinico = calculateCcfClinico(data);
       const ccfFuncional = calculateCcfFuncional(data);
       const totalScore = ccfClinico + ccfFuncional;
       const individualScores = getIndividualScores(data);
       const trilha = getTrilhaDeFuncionalidade(totalScore);
 
-      const resultData = await getCcfClassification(totalScore);
+      const resultData = classifyCcfScoreAndSuggestPlan({ ccfScore: totalScore });
 
-      if ("error" in resultData) {
-        toast({
-          variant: "destructive",
-          title: "Erro na Análise",
-          description: resultData.error,
-        });
-        setResult(null);
-      } else {
-        setResult({
-          totalScore,
-          ccfClinico,
-          ccfFuncional,
-          classification: resultData,
-          individualScores,
-          patientName: data.nome,
-          trilha,
-        });
-        toast({
-          title: "Análise Concluída",
-          description: "O resultado da avaliação CCF está disponível abaixo.",
-        });
-        console.log(
-          JSON.stringify(
-            {
-              ...data,
-              result: { totalScore, ccfClinico, ccfFuncional, classification: resultData, individualScores, trilha },
-            },
-            null,
-            2
-          )
-        );
-      }
+      setResult({
+        totalScore,
+        ccfClinico,
+        ccfFuncional,
+        classification: resultData,
+        individualScores,
+        patientName: data.nome,
+        trilha,
+      });
+      toast({
+        title: "Análise Concluída",
+        description: "O resultado da avaliação CCF está disponível abaixo.",
+      });
+      console.log(
+        JSON.stringify(
+          {
+            ...data,
+            result: { totalScore, ccfClinico, ccfFuncional, classification: resultData, individualScores, trilha },
+          },
+          null,
+          2
+        )
+      );
     });
   };
 
@@ -162,8 +154,37 @@ export function CcfForm() {
       const formData = form.getValues();
       const { individualScores, ccfClinico, ccfFuncional, totalScore, trilha, classification } = result;
 
-      // --- Estilos e Configurações ---
+      // 🖼️ Inserir Logo
+      const logoPath = "/logo.png";
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => {
+          console.warn("Não foi possível carregar o logo, continuando sem ele.");
+          resolve(); // Continua mesmo se o logo não carregar
+        };
+        img.src = logoPath;
+        // Timeout para evitar espera infinita
+        setTimeout(() => {
+          if (!img.complete) {
+            console.warn("Timeout ao carregar logo, continuando sem ele.");
+            resolve();
+          }
+        }, 3000);
+      });
+
       let yPos = 15;
+      if (img.complete && img.width > 0 && img.height > 0) {
+        const logoWidth = 40;
+        const logoHeight = (img.height / img.width) * logoWidth;
+        pdf.addImage(img, "PNG", 15, 10, logoWidth, logoHeight);
+        // Ajusta a posição inicial para começar depois do logo
+        yPos = 10 + logoHeight + 10;
+      }
+
+      // --- Estilos e Configurações ---
       const margin = 15;
       const pageHeight = pdf.internal.pageSize.getHeight();
       const titleFontSize = 14;
@@ -201,6 +222,7 @@ export function CcfForm() {
         head: [['Critério', 'Seleção', 'Pontuação CCF']],
         body: [
           ['Nome do Paciente', formData.nome || 'Não informado', ''],
+          ['Data do Caso', formData.dataDoCaso || 'Não informado', ''],
           ['Idade', `${formData.idade || 'N/A'} anos`, individualScores.ageScore],
           ['HD', formData.hd, individualScores.hdScore],
           ['Internação não eletiva anual', formData.internacao, individualScores.internacaoScore],
@@ -252,7 +274,8 @@ export function CcfForm() {
       pdf.setFontSize(textFontSize);
       pdf.setFont('helvetica', 'normal');
       
-      const planLines = pdf.splitTextToSize(classification.suggestedPlan, 180);
+      const planText = trilha ? trilha.tempo : classification.suggestedPlan;
+      const planLines = pdf.splitTextToSize(planText, 180);
       pdf.text('Plano de Acompanhamento Sugerido:', margin, yPos);
       yPos += lineSpacing;
       pdf.setFillColor(245, 245, 245);
@@ -299,19 +322,24 @@ export function CcfForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="space-y-8 bg-background p-2">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="space-y-8 lg:col-span-2">
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
                 <PatientDataCard />
                 <EvaluationItemsCard />
             </div>
-            <div className="space-y-8 lg:col-span-1">
+            <div className="space-y-6 lg:col-span-1">
                 {result ? (
                 <ResultCard {...result} />
                 ) : (
-                <Card>
-                    <CardContent className="pt-6 text-center text-muted-foreground">
-                    <p>
+                <Card className="border-2 border-slate-200 shadow-lg bg-white/95 backdrop-blur-sm">
+                    <CardContent className="pt-8 pb-8 text-center">
+                    <div className="text-slate-400 mb-2">
+                      <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-slate-600 font-medium">
                         Os resultados da análise aparecerão aqui após o cálculo.
                     </p>
                     </CardContent>
@@ -321,12 +349,23 @@ export function CcfForm() {
             </div>
         </div>
 
-        <div className="flex flex-col-reverse justify-end gap-4 sm:flex-row">
-            <Button type="button" variant="outline" onClick={handleReset}>
+        <div className="flex flex-col-reverse justify-end gap-4 sm:flex-row pt-4 border-t border-slate-200">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleReset}
+              className="border-slate-300 hover:bg-slate-50"
+            >
                 Limpar Formulário
             </Button>
             {result && (
-                <Button type="button" variant="secondary" onClick={handleDownloadPdf} disabled={isGeneratingPdf}>
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={handleDownloadPdf} 
+                  disabled={isGeneratingPdf}
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white shadow-md"
+                >
                     {isGeneratingPdf ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
@@ -335,7 +374,11 @@ export function CcfForm() {
                     Baixar Relatório
                 </Button>
             )}
-            <Button type="submit" disabled={isPending}>
+            <Button 
+              type="submit" 
+              disabled={isPending}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md font-semibold"
+            >
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Calcular CCF
             </Button>

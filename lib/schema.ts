@@ -4,6 +4,7 @@ import { z } from "zod";
 export const ccfFormSchema = z.object({
   // Dados Gerais
   nome: z.string().optional(),
+  dataDoCaso: z.string().optional(),
   idade: z.coerce.number().min(0, "Idade inválida").optional(),
   hd: z.enum(["CID Crônico estável", "CID Crônico", "CID Crônico limitante", "CID Agudo/Avançado"]),
   internacao: z.enum(["Não", "1", "2 ou mais"]),

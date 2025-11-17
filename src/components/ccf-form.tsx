@@ -8,7 +8,6 @@ import { ccfFormSchema, type CcfFormData } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { getCcfClassification } from "@/app/actions";
 import PatientDataCard from "./patient-data-card";
 import EvaluationItemsCard from "./evaluation-items-card";
 import ResultCard from "./result-card";
@@ -21,6 +20,7 @@ import {
   calculateCcfFuncional,
   getIndividualScores,
   getTrilhaDeFuncionalidade,
+  classifyCcfScoreAndSuggestPlan,
   type IndividualScores,
   type ClassifyCCFOutput,
   type TrilhaDeFuncionalidade,
@@ -28,7 +28,6 @@ import {
 } from "@/lib/calculations";
 
 const LOCAL_STORAGE_KEY = "ccf-form-data";
-const img = "/logo.png";
 
 
 type ResultState = {
@@ -51,6 +50,7 @@ export function CcfForm() {
     resolver: zodResolver(ccfFormSchema),
     defaultValues: {
         nome: "",
+        dataDoCaso: "",
         idade: '' as any,
         hd: "CID Crônico estável",
         internacao: "Não",
@@ -97,47 +97,38 @@ export function CcfForm() {
   }, [form]);
 
   const onSubmit: SubmitHandler<CcfFormData> = (data) => {
-    startTransition(async () => {
+    startTransition(() => {
       const ccfClinico = calculateCcfClinico(data);
       const ccfFuncional = calculateCcfFuncional(data);
       const totalScore = ccfClinico + ccfFuncional;
       const individualScores = getIndividualScores(data);
       const trilha = getTrilhaDeFuncionalidade(totalScore);
 
-      const resultData = await getCcfClassification(totalScore);
+      const resultData = classifyCcfScoreAndSuggestPlan({ ccfScore: totalScore });
 
-      if ("error" in resultData) {
-        toast({
-          variant: "destructive",
-          title: "Erro na Análise",
-          description: resultData.error,
-        });
-        setResult(null);
-      } else {
-        setResult({
-          totalScore,
-          ccfClinico,
-          ccfFuncional,
-          classification: resultData,
-          individualScores,
-          patientName: data.nome,
-          trilha,
-        });
-        toast({
-          title: "Análise Concluída",
-          description: "O resultado da avaliação CCF está disponível abaixo.",
-        });
-        console.log(
-          JSON.stringify(
-            {
-              ...data,
-              result: { totalScore, ccfClinico, ccfFuncional, classification: resultData, individualScores, trilha },
-            },
-            null,
-            2
-          )
-        );
-      }
+      setResult({
+        totalScore,
+        ccfClinico,
+        ccfFuncional,
+        classification: resultData,
+        individualScores,
+        patientName: data.nome,
+        trilha,
+      });
+      toast({
+        title: "Análise Concluída",
+        description: "O resultado da avaliação CCF está disponível abaixo.",
+      });
+      console.log(
+        JSON.stringify(
+          {
+            ...data,
+            result: { totalScore, ccfClinico, ccfFuncional, classification: resultData, individualScores, trilha },
+          },
+          null,
+          2
+        )
+      );
     });
   };
 
@@ -162,22 +153,37 @@ export function CcfForm() {
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const formData = form.getValues();
-      // 🖼️ Inserir Logo
-      const img = new Image();
-      img.src = logo.src;
+      const { individualScores, ccfClinico, ccfFuncional, totalScore, trilha, classification } = result;
 
-      await new Promise((resolve) => {
-        img.onload = resolve;
+      // 🖼️ Inserir Logo
+      const logoPath = "/logo.png";
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.onerror = () => {
+          console.warn("Não foi possível carregar o logo, continuando sem ele.");
+          resolve(); // Continua mesmo se o logo não carregar
+        };
+        img.src = logoPath;
+        // Timeout para evitar espera infinita
+        setTimeout(() => {
+          if (!img.complete) {
+            console.warn("Timeout ao carregar logo, continuando sem ele.");
+            resolve();
+          }
+        }, 3000);
       });
 
-      const logoWidth = 40;
-      const logoHeight = (img.height / img.width) * logoWidth;
-
-      pdf.addImage(img, "PNG", 15, 10, 40, 40);
-
-      // Agora o conteúdo começa depois do logo
-      let yPos = 10 + logoHeight + 10;
-      const { individualScores, ccfClinico, ccfFuncional, totalScore, trilha, classification } = result;
+      let yPos = 15;
+      if (img.complete && img.width > 0 && img.height > 0) {
+        const logoWidth = 40;
+        const logoHeight = (img.height / img.width) * logoWidth;
+        pdf.addImage(img, "PNG", 15, 10, logoWidth, logoHeight);
+        // Ajusta a posição inicial para começar depois do logo
+        yPos = 10 + logoHeight + 10;
+      }
 
       // --- Estilos e Configurações --
       const margin = 15;
@@ -217,6 +223,7 @@ export function CcfForm() {
         head: [['Critério', 'Seleção', 'Pontuação CCF']],
         body: [
           ['Nome do Paciente', formData.nome || 'Não informado', ''],
+          ['Data do Caso', formData.dataDoCaso || 'Não informado', ''],
           ['Idade', `${formData.idade || 'N/A'} anos`, individualScores.ageScore],
           ['HD', formData.hd, individualScores.hdScore],
           ['Internação não eletiva anual', formData.internacao, individualScores.internacaoScore],
@@ -268,7 +275,8 @@ export function CcfForm() {
       pdf.setFontSize(textFontSize);
       pdf.setFont('helvetica', 'normal');
       
-      const planLines = pdf.splitTextToSize(classification.suggestedPlan, 180);
+      const planText = trilha ? trilha.tempo : classification.suggestedPlan;
+      const planLines = pdf.splitTextToSize(planText, 180);
       pdf.text('Plano de Acompanhamento Sugerido:', margin, yPos);
       yPos += lineSpacing;
       pdf.setFillColor(245, 245, 245);

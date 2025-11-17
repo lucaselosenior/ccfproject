@@ -211,7 +211,7 @@ export default function ResultCard({
           <div className="space-y-2">
             <h4 className="font-semibold">Plano de Acompanhamento Sugerido</h4>
             <p className="rounded-lg border bg-accent/50 p-3 text-sm text-accent-foreground">
-              {suggestedPlan}
+              {trilha ? trilha.tempo : suggestedPlan}
             </p>
           </div>
 

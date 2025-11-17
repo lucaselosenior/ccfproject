@@ -141,16 +141,25 @@ export default function ResultCard({
     };
   
     return (
-      <Card className="sticky top-8">
-        <CardHeader>
+      <Card className="sticky top-8 border-2 border-slate-200 shadow-xl bg-white/95 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div>
-                <CardTitle>📊 Resultado da Análise</CardTitle>
-                <CardDescription className="mt-1.5">
+                <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+                  <span className="text-2xl">📊</span>
+                  Resultado da Análise
+                </CardTitle>
+                <CardDescription className="mt-1.5 text-slate-600">
                     {patientName ? `Resultados para ${patientName}` : "Pontuação, classificação e plano de acompanhamento."}
                 </CardDescription>
             </div>
-            <Button variant="outline" size="icon" onClick={handleCopyToClipboard} title="Copiar para Planilha">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleCopyToClipboard} 
+              title="Copiar para Planilha"
+              className="border-slate-300 hover:bg-slate-100"
+            >
                 <Copy className="h-4 w-4" />
             </Button>
           </div>
@@ -211,7 +220,7 @@ export default function ResultCard({
           <div className="space-y-2">
             <h4 className="font-semibold">Plano de Acompanhamento Sugerido</h4>
             <p className="rounded-lg border bg-accent/50 p-3 text-sm text-accent-foreground">
-              {suggestedPlan}
+              {trilha ? trilha.tempo : suggestedPlan}
             </p>
           </div>
 

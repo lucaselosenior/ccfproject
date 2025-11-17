@@ -101,14 +101,17 @@ export default function EvaluationItemsCard() {
 
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>⚙️ Itens de Avaliação Funcional</CardTitle>
-        <CardDescription>
+    <Card className="border-2 border-slate-200 shadow-lg bg-white/95 backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
+        <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+          <span className="text-2xl">⚙️</span>
+          Itens de Avaliação e CCF Funcional
+        </CardTitle>
+        <CardDescription className="text-slate-600 mt-1">
           Critérios para cálculo do CCF Funcional.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-8 pt-2 md:grid-cols-2">
+      <CardContent className="grid grid-cols-1 gap-6 pt-6 md:grid-cols-2 p-6">
         {renderSelectField(
           "ims",
           "IMS",
